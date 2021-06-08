@@ -1,0 +1,34 @@
+var string inputcsv_path = "C:\Users\matsumok\Documents\GitHub\SS7Opt\SS7com_sample\CSV_input\No_1825.csv"
+var string outputcsv_path = "C:\Users\matsumok\Documents\GitHub\SS7Opt\SS7com_sample\CSV_output\No_1825.csv"
+
+Echo("inputcsv = "&inputcsv_path)
+Echo("outputcsv = "&outputcsv_path)
+
+var string ModelDir = ThisDir() & "\Model.ikn"
+Echo("ModelDir = "&ModelDir)
+
+Start()
+CreateDataCsv(inputcsv_path,ModelDir,1)
+#1:上書き
+
+var Ss7Data Data = Open(ModelDir,3,2)
+#3:データ変換が必要な場合、開かない
+#2:バックアップデータが含まれた場合、バックアップは削除して開く
+
+if (IsNull(Data) == false)
+{
+  # Data.DeleteResult("結果1")
+  Data.Calculate("結果1","断面算定")
+  var ErrInfo err = GetLastError()
+  #Echo(err.GetErrorMessage())
+  err.GetErrorMessage()
+  if (err.IsOK() == true)
+  {
+    var Ss7Result Res = Data.GetResultData("結果1")
+    Res.ExportResultCsv("2.6.1.大梁;2.6.6.柱;4.4.地震用重量;7.1.3.S梁;7.1.4.S柱",outputcsv_path,1,2)
+    Data.DeleteResult("結果1")
+    # Data.Save()
+  }
+  # Data.Close(2)
+}
+End(2)
